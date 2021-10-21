@@ -9,8 +9,8 @@
     "start:with:args": "node dist/index.js 352795331154866 e3e4f92fd583bfb86ac3987ac0a4b9c7 CLUSTER",
     "prod:forever": "npm run build && node_modules/.bin/forever start dist/index.js",
     "prod:forever:cluster": "npm run build && node_modules/.bin/forever start dist/index.js CLUSTER",
-    "prod:pm2": "npm run build && node_modules/.bin/pm2 start dist/index.js --watch",
-    "prod:pm2:cluster": "npm run build && node_modules/.bin/pm2 start dist/index.js CLUSTER --watch",
+    "prod:pm2:fork": "npm run build && node_modules/.bin/pm2 start ecosystem.config.js --only app-fork",
+    "prod:pm2:cluster": "npm run build && node_modules/.bin/pm2 start ecosystem.config.js --only app-cluster",
     "dev": "nodemon",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -18,6 +18,7 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@types/args": "^5.0.0",
     "@types/bcrypt": "^5.0.0",
     "@types/express": "^4.17.13",
     "@types/mongoose": "^5.11.97",
@@ -44,6 +45,7 @@
     "@types/mongodb": "^4.0.7",
     "@types/reflect-metadata": "^0.1.0",
     "@types/socket.io": "^3.0.2",
+    "args": "^5.0.1",
     "bcrypt": "^5.0.1",
     "connect-mongo": "^4.6.0",
     "cookie-parser": "^1.4.5",
@@ -61,6 +63,7 @@
     "passport": "^0.5.0",
     "passport-facebook": "^3.0.0",
     "passport-local": "^1.0.0",
+    "pm2": "^5.1.2",
     "reflect-metadata": "^0.1.13",
     "socket.io": "^4.2.0"
   }

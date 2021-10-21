@@ -2,11 +2,18 @@ import { Router } from 'express';
 import { isLoggedIn } from '../middlewares/auth';
 import passport from '../middlewares/auth';
 import UserRouter from './user';
-import ProductoRouter from './productosvistafake'
+import ProductoRouter from './productosvistafake';
+import args from 'args';
+import { Request, Response } from 'express';
+import os from 'os';
+import path from 'path'
+import { getRandomNums } from '../utils/random_num';
+import { fork } from 'child_process';
 import { nCPU } from '../index';
 
 
 const router = Router();
+const scriptPath = path.resolve(__dirname, '../utils/getRandoms');
 
 router.get('/login', (req, res) => {
   res.render('login');
@@ -83,12 +90,55 @@ router.get('/info', (req, res) => {
     "argumentos": process.argv,
     "OS": process.platform,
     "Node Version": process.version,
-    "Memory": process.memoryUsage,
+    "Memory": process.memoryUsage(),
     "Path": process.execPath,
     "PID": process.pid,
-    "NumCPU": nCPU
+    "NumCPU": nCPU,
   })
 
+});
+
+
+router.use('/randoms', (req: Request, res: Response) => {
+  const { cant } = req.query;
+  const numberQty = cant || String(100000000);
+  const scriptPath = path.resolve(
+    __dirname,
+    '../../src/utils/random_num.js',
+  );
+
+  const flags = args.parse(process.argv);
+
+  if (flags.mode !== 'cluster') {
+  console.log('on fork mode');
+  const numData = fork(scriptPath, [numberQty as string]);
+  numData.send('start');
+  numData.on('message', result => {
+    res.json({
+      data: {
+        processId: process.pid,
+        result,
+      },
+    });
+  });
+  } else {
+  console.log('on cluster mode');
+  const result = getRandomNums(Number(numberQty));
+  res.json({
+    data: {
+      processId: process.pid,
+      result,
+    },
+  });
+  }
+});
+
+
+
+router.use('/muerte', (req, res) => {
+  res.json({ msg: 'OK' });
+  console.log(`PID => ${process.pid} will die`);
+  process.exit(0);
 });
 
 export default router;
